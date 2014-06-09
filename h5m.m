@@ -3,11 +3,18 @@ classdef h5m
     %   Class:
     %   h5m
     %
+    %   This package is an attempt to simplify 
+    %
     %   Main documentation for the interfaces can be found at:
     %   http://www.hdfgroup.org/HDF5/doc/RM/RM_H5Front.html
     %
     %   See Also:
+    %   h5m.file
+    %   h5m.dataset
+    %   h5m.group
     %   H5
+    %   h5disp
+    %   h5info
     
     %{
     H5.close                - Closes the library
