@@ -5,16 +5,20 @@ classdef file < handle
     %
     %   User Guide:
     %       http://www.hdfgroup.org/HDF5/doc/UG/UG_frame08TheFile.html
-    %   
+    %
     %   API:
     %       http://www.hdfgroup.org/HDF5/doc/RM/RM_H5F.html
+    %
+    %   Property Lists:
+    %   h5m.property_list.file_creation
+    %   h5m.property_list.file_access
     %
     %   See Also:
     %   H5F
     
     %{
       close            - Closes an HDF5 file
-      create           - Creates an HDF5 file
+      DONE create           - Creates an HDF5 file
       flush            - Flushes buffers to disk
       get_access_plist - Returns a file access property identifier
       get_create_plist - Returns a file creation property list
@@ -29,38 +33,114 @@ classdef file < handle
       get_obj_ids      - Returns a list of open object identifiers
       is_hdf5          - Determines if a file is in the HDF5 format
       mount            - Mounts a file
-      open             - Opens an existing file
+      DONE open             - Opens an existing file
       reopen           - Returns a new identifier for an open file
       set_mdc_config   - Attempts to configure file's metadata cache
       unmount          - Unmounts a file
     %}
     
     properties (Hidden)
-       h 
+        h
     end
     
     %NOT YET IMPLEMENTED
-    properties
-       filesize
-       freespace
-       info
-       mdc_config
-       mdc_hit_rate
-       mdc_size
-       name
-       obj_count
-       obj_ids
+    properties (Dependent)
+        file_size  %Size in bytes????
+        free_space %Space unused by any objects ... Why would this happen?
+        %In bytes????
+        info
+        
+        %MDC - meta data cache - http://www.hdfgroup.org/HDF5/doc/Advanced/MetadataCache/
+        %-------------------------
+        %- ??? Where can I find out more about this
+        mdc_config    %Current configuration
+        mdc_hit_rate  %(cache hits / (cache hits + cache misses))
+        mdc_size      %h5m.file.mdc_size
+        name
+        obj_count
     end
     
     methods
-        
+        function value = get.file_size(obj)
+           value = H5F.get_filesize(obj.h);  
+        end
+        function value = get.free_space(obj)
+           value = H5F.get_freespace(obj.h); 
+        end
+        function value = get.info(obj)
+           %TODO: Consider casting to an object ...
+           value = H5F.get_info(obj.h); 
+        end
+        function value = get.mdc_config(obj)
+           value = H5F.get_mdc_config(obj.h);  
+        end
+        function value = get.mdc_hit_rate(obj)
+           value = H5F.get_mdc_hit_rate(obj.h);  
+        end
+        function value = get.mdc_size(obj) 
+           value = h5m.file.mdc_size(obj.h);
+        end
     end
     
-    methods (Access=protected) 
+    methods (Access=protected)
         function obj = file(file_id)
             %
             %   obj = h5m.file(file_id);
-           obj.h = file_id; 
+            %
+            %   Access via open() or close()
+            obj.h = file_id;
+        end
+    end
+    
+    methods
+        function obj_count = getObjectCounts(obj,types)
+            %
+            %   Inputs:
+            %   ---------------
+            %   types : char, cellstr,  
+            %       
+            %  
+            
+            %Returned -1 for a cell array input for types. I meant
+            %to convert the cell array but I had forgotten. I'm not sure
+            %that this is an expected output.
+            %   
+            
+            if nargin < 2 || isempty(types)
+               types = 'H5F_OBJ_ALL';
+            elseif iscellstr(types)
+                values = cellfun(@H5ML.get_constant_value,types);
+                
+                types = 0;
+                for iValue = 1:length(values)
+                   types = bitor(types,values(iValue)); 
+                end
+            end
+            
+            %TODO: Allow support of a numeric array
+            
+           obj_count = H5F.get_obj_count(obj.h,types); 
+        end
+        function getObjectIDsOfType(obj,types_to_get,varargin)
+        %1 'H5F_OBJ_FILE'   
+        %2  'H5F_OBJ_DATASET'  
+        %4  'H5F_OBJ_GROUP'    
+        %8  'H5F_OBJ_DATATYPE' 
+        %16 'H5F_OBJ_ATTR'     
+        %31 'H5F_OBJ_ALL'      
+        %32 'H5F_OBJ_LOCAL' 
+        in.max_objs = [];
+        in = h5m.sl.in.processVarargin(in,varargin);
+        
+        if isempty(in.max_objs)
+            max_objs = obj.max_objs;
+        else
+            max_objs = in.max_objs;
+        end
+            
+        
+        [n_ids,id_list] = H5F.get_obj_ids(obj.h,types_to_get,max_objs);
+        
         end
     end
     methods (Static)
@@ -74,46 +154,53 @@ classdef file < handle
             %       'r'
             %       'r
             %
-            %   fapl_obj: h5m.property_list.file_access 
+            %   fapl_obj: h5m.property_list.file_access
             
-            %Mode
-            %H5F_ACC_EXCL   - rw, fail if exists            (create_new_file_for_rw)
-            %H5F_ACC_TRUNC  - rw, overwrite if necessary    (rw)
-            %H5F_ACC_RDONLY - r, fails if not exist         (read only)
-            %HFF_ACC_RDWR   - rw, fails if doesn't exist    (read_or_modify_file)
-            
-            %
+            in.read_only = true;
+            in.file_access_pl = [];
+            in = h5m.sl.in.processVarargin(in,varargin);
+
             if nargin == 1
                 file_id = H5F.open(filepath_or_name);
             else
-                
+                if in.read_only
+                    flags = 'H5F_ACC_RDONLY';
+                else
+                    flags = 'H5F_ACC_RDWR';
+                end
+                if isempty(in.file_access_pl)
+                    fapl_id = 'H5P_DEFAULT';
+                else
+                    fapl_id = in.file_access_pl;
+                end
+                file_id = H5F.open(filepath_or_name,flags,fapl_id);
             end
-            obj     = h5m.file(file_id);
+            obj = h5m.file(file_id);
             
         end
         function obj = create(filepath_or_name,varargin) %,fcpl_obj,fapl_obj)
-           %
-           %    h5m.file.create(filepath_or_name,mode,fcpl_obj,fapl_obj)
-           %
-           %    Inputs:
-           %    -------
-           %    filepath_or_name :
-           %
-           %    Optional Inputs:
-           %    ----------------
-           %    fail_if_exists : (default true)
-           %        If true, an error will be thrown if the file exists. If
-           %        false, new data will overwrite any old data.
-           %    file_creation_pl : 
-           %        File cer
-           %    file_access_pl : h5m.property_list.file_access 
-           %
+            %
+            %    h5m.file.create(filepath_or_name,mode,fcpl_obj,fapl_obj)
+            %
+            %    Inputs:
+            %    -------
+            %    filepath_or_name :
+            %
+            %    Optional Inputs:
+            %    ----------------
+            %    fail_if_exists : (default true)
+            %        If true, an error will be thrown if the file exists. If
+            %        false, new data will overwrite any old data.
+            %    file_creation_pl :
+            %        File cer
+            %    file_access_pl : h5m.property_list.file_access
+            %
             
-           in.fail_if_exists   = true;
-           in.file_creation_pl = [];
-           in.file_access_pl   = [];
-           in = h5m.sl.in.processVarargin(in,varargin);
-           
+            in.fail_if_exists   = true;
+            in.file_creation_pl = [];
+            in.file_access_pl   = [];
+            in = h5m.sl.in.processVarargin(in,varargin);
+            
             if nargin == 1
                 id = H5F.create(filepath_or_name);
             else
@@ -145,9 +232,9 @@ classdef file < handle
         end
     end
     
-    methods 
+    methods
         function delete(obj)
-           
+            
         end
     end
     

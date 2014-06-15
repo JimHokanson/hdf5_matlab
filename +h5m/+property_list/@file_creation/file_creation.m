@@ -2,6 +2,12 @@ classdef file_creation < handle
     %
     %   Class:
     %   h5m.property_list.file_creation
+    %
+    %   Details can be found at:
+    %   
+    %   See Also:
+    %   h5m.file
+    %   h5m.property_list.file_access
     
     %{
        File Creation Properties

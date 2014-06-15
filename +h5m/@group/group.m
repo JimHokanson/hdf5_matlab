@@ -9,12 +9,18 @@ classdef group < handle
     %   API:
     %       http://www.hdfgroup.org/HDF5/doc/RM/RM_H5G.html
     %
+    %   Property Lists:
+    %   h5m.property_list.group_creation
+    %   h5m.property_list.group_access
+    %
     %   See Also:
     %   H5G
     
+    %TODO: Consider inheriting from H5O
+    
     %{
       close              - Closes the specified group
-      create             - Creates a new group
+      DONE create             - Creates a new group
       get_info           - Returns information about a group
       open               - Opens a group
     %}
@@ -23,14 +29,42 @@ classdef group < handle
         h
     end
     
+    properties (Dependent)
+       info 
+    end
+    
+    methods
+        function value = get.info(obj)
+           value = H5G.get_info(obj.h); 
+        end
+    end
+    
     methods
         function obj = group(id)
+            %
+            %   obj = h5m.group(id)
             obj.h = id;
+        end
+        function delete(obj)
+           H5G.close(obj.h); 
         end
     end
     methods (Static)
-        function obj = open(parent_id,name,gapl_obj)
-           obj = []; 
+        function obj = open(parent_id,name)
+            %
+            %
+            %
+            
+            in.group_access_pl = [];
+            in = h5m.sl.in.processVarargin(in,varargin);
+            
+            if nargin == 2
+                group_id = H5G.open(parent_id,name);
+            else
+                group_id = H5G.open(parent_id,name,in.group_access_pl); 
+            end
+            
+            obj = h5m.group(group_id); 
         end
         function obj = create(parent_obj,name,varargin)
             %

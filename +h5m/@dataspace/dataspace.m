@@ -13,6 +13,11 @@ classdef dataspace < handle
     %
     %   API:
     %       http://www.hdfgroup.org/HDF5/doc/RM/RM_H5S.html
+    %
+    %   See Also:
+    %   H5S
+    %   h5m.dataspace.simple
+    %   h5m.dataspace.scalar
     
     %{
       copy                       - Creates a copy of a dataspace
@@ -30,6 +35,8 @@ classdef dataspace < handle
       get_select_npoints         - Gets point count in a selection
       get_select_type            - Gets type of dataspace selection
     
+      %Simple dataspace - see h5m.dataspace.simple
+      %-------------------------------
       get_simple_extent_dims     - Gets dataspace dimension size
       get_simple_extent_ndims    - Determines rank of dataspace
       get_simple_extent_npoints  - Gets element count in a dataspace
@@ -38,6 +45,8 @@ classdef dataspace < handle
       is_simple                  - Determines if dataspace is simple
       offset_simple              - Sets offset of a simple dataspace
       
+      %Selection things
+      %----------------------------------
       select_all                 - Selects the entire dataspace
       select_elements            - Selects elements for dataspace
       select_hyperslab           - Adds hyperslab to a selection
@@ -64,12 +73,8 @@ classdef dataspace < handle
            %Options
            %------------        
            %'H5S_SCALAR'
-           %'H5S_SIMPLE'
+           %'H5S_SIMPLE' - no need, see h5m.dataspace.create_simple
            %'H5S_NULL'
-        end
-        function create_simple()
-           %space_id = H5S.create_simple(rank, h5_dims, h5_maxdims
-           %TODO: Subclass
         end
     end
     methods
