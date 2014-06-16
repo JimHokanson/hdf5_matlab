@@ -23,6 +23,8 @@ classdef group < handle
     
     %TODO: Consider inheriting from H5O
     
+    %In Matlab it won't let chunksize be greater than the datasize
+    
     %{
       DONE close              - Closes the specified group
       DONE create             - Creates a new group
