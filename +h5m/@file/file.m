@@ -33,8 +33,11 @@ classdef file < handle
       get_obj_ids      - Returns a list of open object identifiers
       is_hdf5          - Determines if a file is in the HDF5 format
       mount            - Mounts a file
-      DONE open             - Opens an existing file
+      DONE open        - Opens an existing file
+    
+      ?????  Why would you want this ?????
       reopen           - Returns a new identifier for an open file
+                        
       set_mdc_config   - Attempts to configure file's metadata cache
       unmount          - Unmounts a file
     %}
@@ -48,7 +51,8 @@ classdef file < handle
         file_size  %Size in bytes????
         free_space %Space unused by any objects ... Why would this happen?
         %In bytes????
-        info
+        info %TODO: Format not yet specified, it is whatever the underlying 
+        %code returns
         
         %MDC - meta data cache - http://www.hdfgroup.org/HDF5/doc/Advanced/MetadataCache/
         %-------------------------
@@ -77,8 +81,12 @@ classdef file < handle
         function value = get.mdc_hit_rate(obj)
            value = H5F.get_mdc_hit_rate(obj.h);  
         end
-        function value = get.mdc_size(obj) 
+        function value = get.mdc_size(obj)
+           %Object constructor call
            value = h5m.file.mdc_size(obj.h);
+        end
+        function value = get.name(obj)
+           value = H5F.get_name(obj.h);
         end
     end
     
@@ -95,8 +103,10 @@ classdef file < handle
     methods
         function obj_count = getObjectCounts(obj,types)
             %
-            %   Inputs:
-            %   ---------------
+            %   obj_count = getObjectCounts(obj,types)
+            %
+            %   Optional Inputs:
+            %   ----------------
             %   types : char, cellstr,  
             %       
             %  
@@ -122,24 +132,36 @@ classdef file < handle
            obj_count = H5F.get_obj_count(obj.h,types); 
         end
         function getObjectIDsOfType(obj,types_to_get,varargin)
-        %1 'H5F_OBJ_FILE'   
+            
+            
+            
+        %TODO: How can I provide these as enumerations ?????
+        %
+        %
+        %1  'H5F_OBJ_FILE'   
         %2  'H5F_OBJ_DATASET'  
         %4  'H5F_OBJ_GROUP'    
         %8  'H5F_OBJ_DATATYPE' 
         %16 'H5F_OBJ_ATTR'     
         %31 'H5F_OBJ_ALL'      
         %32 'H5F_OBJ_LOCAL' 
+        
+        
         in.max_objs = [];
         in = h5m.sl.in.processVarargin(in,varargin);
         
         if isempty(in.max_objs)
-            max_objs = obj.max_objs;
+            max_objs = obj.getObjectCounts();
         else
             max_objs = in.max_objs;
         end
             
         
         [n_ids,id_list] = H5F.get_obj_ids(obj.h,types_to_get,max_objs);
+        
+        %id_list : H5ML.id
+        
+        keyboard
         
         end
     end

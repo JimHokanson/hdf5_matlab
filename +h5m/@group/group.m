@@ -15,14 +15,19 @@ classdef group < handle
     %
     %   See Also:
     %   H5G
+    %   H5O
+    %   h5m.file
+    %   h5m.dataset
+    %   h5m.property_list.group_creation
+    %   h5m.property_list.group_access
     
     %TODO: Consider inheriting from H5O
     
     %{
-      close              - Closes the specified group
+      DONE close              - Closes the specified group
       DONE create             - Creates a new group
-      get_info           - Returns information about a group
-      open               - Opens a group
+      DONE get_info           - Returns information about a group
+      DONE open               - Opens a group
     %}
     
     properties (Hidden)
@@ -30,12 +35,13 @@ classdef group < handle
     end
     
     properties (Dependent)
-       info 
+        info %Format is currently unspecified (i.e. it is whatever the API
+        %returns)
     end
     
     methods
         function value = get.info(obj)
-           value = H5G.get_info(obj.h); 
+            value = H5G.get_info(obj.h);
         end
     end
     
@@ -46,25 +52,51 @@ classdef group < handle
             obj.h = id;
         end
         function delete(obj)
-           H5G.close(obj.h); 
+            try  %#ok<TRYNC>
+                H5G.close(obj.h);
+            end
+        end
+        function close(obj)
+            H5G.close(obj.h);
         end
     end
     methods (Static)
-        function obj = open(parent_id,name)
+        function obj = open(parent_obj,name,varargin)
             %
             %
+            %   obj = open(parent_obj,name,varargin)
             %
+            %   obj = open(parent_obj,name,varargin)
+            %
+            %   Inputs:
+            %   -------
+            %   name : 
+            %       Name of the group. How are nested objects handled with
+            %       names? Do you need the full name if you pass in a lower
+            %       object???? For a group whose parent is root you need
+            %       a leading slash ...
+            %
+            %   Optional Inputs:
+            %   ----------------
+            %   group_access_pl : h5m.property_list.group_access
+            %
+            %   Example:
+            %   ---------------------------------------
+            %   file_obj  = h5m.file.open(file_path);
+            %   group_obj = h5m.group.open(file_obj,'test_path');
+            
+            
             
             in.group_access_pl = [];
             in = h5m.sl.in.processVarargin(in,varargin);
             
             if nargin == 2
-                group_id = H5G.open(parent_id,name);
+                group_id = H5G.open(parent_obj.h,name);
             else
-                group_id = H5G.open(parent_id,name,in.group_access_pl); 
+                group_id = H5G.open(parent_obj.h,name,in.group_access_pl.h);
             end
             
-            obj = h5m.group(group_id); 
+            obj = h5m.group(group_id);
         end
         function obj = create(parent_obj,name,varargin)
             %
@@ -73,7 +105,7 @@ classdef group < handle
             %   Inputs:
             %   -------
             %   parent_obj : h5m.group or h5m.file
-            %   
+            %
             %   name : str
             %       Name of the group to create. ??? - rules for nesting?
             %
