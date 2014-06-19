@@ -30,6 +30,9 @@ classdef dataset_creation < handle
      get_external          - Gets external file from the list
      get_external_count    - Gets the count of external files
      
+     set_external          - Adds external file to the list 
+    
+    
      get_filter            - Gets the filter in a pipeline
      get_filter_by_id      - Gets the filter information by index
      
@@ -42,7 +45,7 @@ classdef dataset_creation < handle
      
      
      set_deflate           - Sets compression method and level
-     set_external          - Adds external file to the list
+     
 
      set_filter            - Adds the filter to the pipeline
      set_fletcher32        - Sets up use of the Fletcher32 filter

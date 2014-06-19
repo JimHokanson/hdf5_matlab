@@ -10,6 +10,12 @@ classdef filter_manager
     %   H5Z
     
     %{
+   	filter_avail    - Determines whether a filter is available
+  	get_filter_info - Retrieves information about a filter
+    
+    %}
+    
+    %{
         'H5Z_FILTER_DEFLATE'
         'H5Z_FILTER_SHUFFLE'
         'H5Z_FILTER_FLETCHER32'
@@ -40,6 +46,10 @@ classdef filter_manager
     %????? - How to determine if dynamically loaded filters are available
     
     properties
+        
+    end
+    
+    properties
        gzip_available %http://en.wikipedia.org/wiki/Gzip
        szip_available %http://www.hdfgroup.org/doc_resource/SZIP/
        nbit_available %Useful when only storing n bits of data in a larger
@@ -53,6 +63,17 @@ classdef filter_manager
        %http://www.pytables.org/docs/manual-1.3.3/x5502.html
        fletcher_avaiable %Data integrity check, not for compression
        %http://en.wikipedia.org/wiki/Fletcher's_checksum
+       %gzip_info
+       %szip_info
+       %
+       %    [filter_config_flags] = H5Z.get_filter_info(filter)
+       %
+       %        Bitwise operation ...
+       %        H5Z_FILTER_CONFIG_ENCODE_ENABLED
+       %        H5Z_FILTER_CONFIG_DECODE_ENABLED
+        %      	flags = H5Z.get_filter_info('H5Z_FILTER_DEFLATE');
+        %     	functionality = H5ML.get_constant_value('H5Z_FILTER_CONFIG_ENCODE_ENABLED');
+        %    	enabled = bitand(flags,functionality) > 0;
     end
     
     methods
