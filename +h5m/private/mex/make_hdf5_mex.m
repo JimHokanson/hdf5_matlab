@@ -1,23 +1,39 @@
 %{
+
+----------------------------
+ This is a work in progress 
+----------------------------
+
 Steps to getting things working:
+
+1) HDF5 Installation
+    Windows: use prebuilt binares at:
+                    http://www.hdfgroup.org/HDF5/release/obtain5.html
+
 
 
 Failure Points:
 1) Wrong Visual Studio Version vs pre-built binaries
 2) 
 
-make_hdf5_mex
+To run call: 
+--------------
+make_hdf5_mex()
 
-%Testing:
-%-----------
-hdf5_mex
 
 %NOTE: Need to change compiler flags from:
 /MD
 TO
-/MDt
+/MT
 
 This allows inclusion of the libraries ...
+
+#TODO: Make this automatic
+
+mex.getCompilerConfigurations('c++')
+
+file at something like:
+C:\Users\Jim\AppData\Roaming\MathWorks\MATLAB\R2014a\mex_C++_win64.xml
 
 %}
 
