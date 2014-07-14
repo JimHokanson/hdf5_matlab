@@ -6,7 +6,8 @@
 
 #include "mex.h"
 #include "hdf5.h"
-#include <string.h> //For string comparison
+#include <string>
+#include "enum_map_info.h"
 
 #if defined(_MSC_VER) || defined(__BORLANDC__)
 typedef __int64 int64;
@@ -95,12 +96,40 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       //    status = hdf5_mex('H5Zfilter_avail',filter_id);    
         
       htri_t status;
+      //TODO: Remove hard coded filter values
+      // - this requires enumeration support
       status = H5Zfilter_avail(H5Z_FILTER_SZIP);
       
       setInt8Output(plhs,0,(int8)status); 
-      //TODO: Convert result to int8
+    } else if (!strcmp("H5Zget_filter_info",cmd)){
+      //http://www.hdfgroup.org/HDF5/doc/RM/RM_H5Z.html#Compression-GetFilterInfo
+      //H5Z_filter_t filter, unsigned int *filter_config   
+      //
+      //    [err,config] = hdf5_mex('H5Zget_filter_info',filter_id);  
+        
+      unsigned int filter_config = 0;
+      herr_t function_error;
+      //TODO: Replace hardcoded value
+      function_error = H5Zget_filter_info(H5Z_FILTER_SZIP,&filter_config);
+      setInt8Output(plhs,0,(int8)function_error);
+      setInt8Output(plhs,0,(int8)filter_config);
+    } else if (!strcmp("H5MLget_constant_value",cmd)){
+        char *enum_string;
+        enum_string = mxArrayToString(prhs[1]);
+        
+        //TODO: I'm still working on this. Once this code works I'll need
+        //to create a function that will support translation of a given
+        //input with the following features
+        // - handling string or number
+        // - handling invalid options - i.e. bad strings - throw error
+        // - handling all number types
+        mexPrintf("Test: %d\n",ENUM_MAP.at("H5D_CHUNKED"));
+        
+        //map<string, int>::iterator p;
+        //p = ENUM_MAP.find("H5D_CHUNKED");
+        //mexPrintf("Test: %d",ENUM_MAP["H5D_CHUNKED"]);
+        //setDoubleOutput(plhs,0,(double)(ENUM_MAP[enum_string]));  
     }
-    
     
     //herr_t  ret;
     
