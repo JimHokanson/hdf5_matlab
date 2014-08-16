@@ -123,12 +123,12 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // - handling string or number
         // - handling invalid options - i.e. bad strings - throw error
         // - handling all number types
-        mexPrintf("Test: %d\n",ENUM_MAP.at("H5D_CHUNKED"));
+        //mexPrintf("Test: %d\n",ENUM_MAP.at("H5D_CHUNKED"));
         
         //map<string, int>::iterator p;
         //p = ENUM_MAP.find("H5D_CHUNKED");
         //mexPrintf("Test: %d",ENUM_MAP["H5D_CHUNKED"]);
-        //setDoubleOutput(plhs,0,(double)(ENUM_MAP[enum_string]));  
+        setDoubleOutput(plhs,0,(double)(ENUM_MAP[enum_string]));  
     }
     
     //herr_t  ret;
